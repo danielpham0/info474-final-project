@@ -38,16 +38,24 @@ promise.then(function(response) {
     console.log(error);
 })
 
-d3.csv('../Collisions.csv', dataPreprocessor).then(function(dataset) {
+d3.csv('../Collisions 2.csv', dataPreprocessor).then(function(dataset) {
     collisions = dataset;
-    console.log(collsions)
 });
 
 var myStyle = {
-    "color": "black",
+    "color": "#ff7800",
     "stroke": "black",
     "weight": 1,
     "opacity": 0.5
+};
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    fillColor: "#black",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
 };
 
 // call map functions
@@ -56,7 +64,13 @@ function mapControl(neighborhoodData) {
 
     L.geoJson(neighborhoodData, {style: myStyle}).addTo(map);
 
-    let geojson = L.geoJson(neighborhoodData, {
+    L.geoJson(neighborhoodData, {
         style: myStyle,
+    }).addTo(map);
+
+    L.geoJSON(neighborhoodData, {
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
     }).addTo(map);
 }
