@@ -26,7 +26,7 @@ var svg = d3.select(map.getPanes().overlayPane).append("svg"),
 g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
 d3.json("neighborhoods.geojson")
-  .then(function(neighborhoods){
+  .then(function(neighborhoods) {
     // Used to draw SVG paths alongside Leaflet
     const projectPoint = function(x, y) {
         const point = map.latLngToLayerPoint(new L.LatLng(y, x))
@@ -75,11 +75,47 @@ d3.json("neighborhoods.geojson")
                             d3.select(this).attr("fill", "black")
                         });
         } 
-  }).catch(function(error) {
+}).catch(function(error) {
     console.log(error)
-  });;
-
-d3.csv('../Collisions.csv', dataPreprocessor).then(function(dataset) {
-    collisions = dataset;
-    console.log(collsions)
 });
+
+d3.csv("../Collisions 2.csv").then(function(dataset) {
+    dataset = dataset.slice(0, 100);
+    
+    collisions = dataset.filter(item => item.X != "" || item.Y != "")
+    const overlay = d3.select(map.getPanes().overlayPane)
+    const svg1 = overlay.select('svg').attr("pointer-events", "auto")
+    
+    const Dots = svg1.selectAll('circle')
+                    .attr("class", "Dots")
+                    .data(collisions)
+                    .join('circle')
+                        .attr("id", "dotties")
+                        .attr("fill", "steelblue") 
+                        .attr("stroke", "black")
+                        //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
+                        //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
+                        //Finally, the returned conversion produces an x and y point. We have to select the the desired one using .x or .y
+                        .attr("cx", d => map.latLngToLayerPoint([d.Y,d.X]).x)
+                        .attr("cy", d => map.latLngToLayerPoint([d.Y,d.X]).y)
+                        .attr("r", 5)
+                        .on('mouseover', function() { //function to add mouseover event
+                            d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+                              .duration('150') //how long we are transitioning between the two states (works like keyframes)
+                              .attr("fill", "red") //change the fill
+                              .attr('r', 10) //change radius
+                          })
+                          .on('mouseout', function() { //reverse the action based on when we mouse off the the circle
+                            d3.select(this).transition()
+                              .duration('150')
+                              .attr("fill", "steelblue")
+                              .attr('r', 5)
+                          });
+
+    const update = () => Dots
+        .attr("cx", d => map.latLngToLayerPoint([d.Y,d.Y]).x)
+        .attr("cy", d => map.latLngToLayerPoint([d.Y,d.Y]).y)
+  
+    map.on("zoomed", update)
+});
+
