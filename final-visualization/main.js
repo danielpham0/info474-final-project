@@ -22,55 +22,64 @@ var map = L.map('map').setView([47.6062, -122.3321], 11);
 var tileLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png')
 tileLayer.addTo(map)
 
-// get neighborhoodData
-var neighborhoodData;
+var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-// retreived from https://github.com/seattleio/seattle-boundaries-data/tree/9c56894e67e3fb0faa3219efb6a0d66312298428
-let promise = fetch("https://raw.githubusercontent.com/seattleio/seattle-boundaries-data/9c56894e67e3fb0faa3219efb6a0d66312298428/data/neighborhoods.geojson");
-promise.then(function(response) {
-    return response.json();
-}).then(function(data) {
-    neighborhoodData = data;
-    mapControl(neighborhoodData);
-})
-.catch(function(error) {
-    console.log("Error");
-    console.log(error);
-})
+d3.json("neighborhoods.geojson")
+  .then(function(neighborhoods){
+    // Used to draw SVG paths alongside Leaflet
+    const projectPoint = function(x, y) {
+        const point = map.latLngToLayerPoint(new L.LatLng(y, x))
+        this.stream.point(point.x, point.y)
+    }
+    // Creates the projections and paths using that initial function
+    const projection = d3.geoTransform({point: projectPoint})
+    const pathCreator= d3.geoPath().projection(projection);
+    
+    // Creates a path for each feature in the geoJson
+    const areaPaths = g.selectAll('path')
+        .data(neighborhoods.features)
+        .join('path')
+        
+        // Listends to changes in map and calls a reset when necessary
+        map.on("viewreset", reset);
 
-d3.csv('../Collisions 2.csv', dataPreprocessor).then(function(dataset) {
+        // Init for the map
+        reset();
+
+        // Function that recreates the paths properly
+        function reset() {
+            // Bounds based on the neighborhood geojson and map
+            bounds = pathCreator.bounds(neighborhoods);
+            var topLeft = bounds[0],
+                bottomRight = bounds[1];
+            
+            //Adjusts width and height for the svg
+            svg.attr("width", bottomRight[0] - topLeft[0])
+                .attr("height", bottomRight[1] - topLeft[1])
+                .style("left", topLeft[0] + "px")
+                .style("top", topLeft[1] + "px");
+            g.attr("transform", "translate(" + -topLeft[0] + "," 
+                + -topLeft[1] + ")");
+
+            // Initialize each path with its attributes
+            areaPaths.attr("d", pathCreator)
+                .attr('fill-opacity', 0.3)
+                .attr('stroke', 'black')
+                .attr("z-index", 3000)
+                .attr('stroke-width', 1)
+                .on("mouseover", function(d){
+                            d3.select(this).attr("fill", "red")
+                        })
+                .on("mouseout", function(d){
+                            d3.select(this).attr("fill", "black")
+                        });
+        } 
+  }).catch(function(error) {
+    console.log(error)
+  });;
+
+d3.csv('../Collisions.csv', dataPreprocessor).then(function(dataset) {
     collisions = dataset;
+    console.log(collsions)
 });
-
-var myStyle = {
-    "color": "#ff7800",
-    "stroke": "black",
-    "weight": 1,
-    "opacity": 0.5
-};
-
-var geojsonMarkerOptions = {
-    radius: 8,
-    fillColor: "#black",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-};
-
-// call map functions
-function mapControl(neighborhoodData) {
-    L.geoJson(neighborhoodData).addTo(map);
-
-    L.geoJson(neighborhoodData, {style: myStyle}).addTo(map);
-
-    L.geoJson(neighborhoodData, {
-        style: myStyle,
-    }).addTo(map);
-
-    L.geoJSON(neighborhoodData, {
-        pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
-    }).addTo(map);
-}
