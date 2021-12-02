@@ -1,3 +1,23 @@
+function dataPreprocessor(row) {
+    return {
+        X: row.X,
+        Y: row.Y,
+        LOC: row.LOCATION,
+        SEVCODE: row.SEVERITYCODE,
+        SEVDESC: row.SEVERITYDESC,
+        COLTYPE: row.COLLISIONTYPE,
+        PCOUNT: row.PERSONCOUNT,
+        VCOUNT: row.VEHCOUNT,
+        INJURY: row.INJURIES,
+        SINJURY: row.SERIOUSINJURIES,
+        DEAD: row.FATALITIES,
+        DATETIME: row.INCDTTM,
+        WEATHER: row.WEATHER,
+        ROADCOND: row.ROADCOND,
+        LIGHTCOND: row.LIGHTCOND
+    };
+}
+
 var map = L.map('map').setView([47.6062, -122.3321], 11);
 var tileLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png')
 tileLayer.addTo(map)
@@ -58,3 +78,8 @@ d3.json("neighborhoods.geojson")
   }).catch(function(error) {
     console.log(error)
   });;
+
+d3.csv('../Collisions.csv', dataPreprocessor).then(function(dataset) {
+    collisions = dataset;
+    console.log(collsions)
+});
