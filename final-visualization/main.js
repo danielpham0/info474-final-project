@@ -1,13 +1,21 @@
 var curMonthRange = [3, 10]
 var curPersonRange = [2, 6]
 var dotMode = false
-var curNeighborhood = "all"
+var curNeighborhood = "All_Neighborhoods"
 
 // Global function called when select element is changed
 function onNeighborhoodChanged() {
     var select = d3.select('#neighborhood_select').node();
+    var zoom = 14
     // Get current value of select element
-    curNeighborhood = select.options[select.selectedIndex].value;
+    n = select.options[select.selectedIndex].value.split("/");
+    curNeighborhood = n[0]
+    neighborhoodCenter = [parseFloat(n[1]),parseFloat(n[2])]
+    if (curNeighborhood == "All_Neighborhoods") {
+        zoom = 11
+    }
+    // on select go to that area
+    map.setView(neighborhoodCenter, zoom);
     // TODO: Update chart here -- will need to handle value "all"
 }
 
@@ -45,25 +53,27 @@ var backButton = d3.select('#back_button').style("margin", "10px")
         dotMode = false
         // TODO: Update chart here
         map.setView([47.6062, -122.3321], 11);
-        neighborhoodSelect.property("value", "all");
+        neighborhoodSelect.property("value", "All_Neighborhoods/47.6062/-122.3321");
 });
 
 d3.json("neighborhoods.geojson")
   .then(function(neighborhoods) {
     // Set up neighborhood select
     let neighborhoodList = [...new Set(neighborhoods.features.map((feature) => {
-        let n = feature.properties.nhood
-        if (n) return n
+        let n = feature.properties.nhood || feature.properties.name
+        if (feature.properties.nhood && feature.properties.name) {
+            n = feature.properties.nhood + "-" + feature.properties.name
+        }
+        let centerPoint = turf.center(feature).geometry.coordinates
+        //adjust the values for center point
+        if (n) return [n, centerPoint[1], centerPoint[0]]
     }))]
+    neighborhoodList.unshift(["All Neighborhoods", 47.6062, -122.3321])
     neighborhoodSelect.selectAll("option").data(neighborhoodList)
         .enter().append("option").attr("value", function(n) {
-            if (typeof n !== 'undefined') {
-                return n.replaceAll(' ', '_')
-            }
+            return n[0].replaceAll(' ', '_') + "/" + n[1] + "/" + n[2]
         }).text(function(n) {
-            if (typeof n !== 'undefined') {
-                return n
-            }
+                return n[0]
         })
 
     // Used to draw SVG paths alongside Leaflet
@@ -115,35 +125,38 @@ d3.json("neighborhoods.geojson")
             .attr('stroke-width', 1)
             .on("mouseover", function(d){
                     d3.select(this).attr("fill", "red")
-                    if (d.properties.nhood) {
-                        d3.selectAll('.' + d.properties.nhood.replaceAll(' ', '_'))
+                    if (d.properties.nhood && d.properties.name) {
+                        d3.selectAll('.' + (d.properties.nhood + "-" + d.properties.name)
+                            .replaceAll(' ', '_'))
                             .style("display", "block")
                     }
             })
             .on("mouseout", function(d){
                     d3.select(this).attr("fill", "black")
-                    if (d.properties.nhood) {
-                        d3.selectAll('.' + d.properties.nhood.replaceAll(' ', '_'))
+                    if (d.properties.nhood && d.properties.name) {
+                        d3.selectAll('.' + (d.properties.nhood + "-" + d.properties.name)
+                            .replaceAll(' ', '_'))
                             .style("display", "none")
                     }
-            })
-            .on("click", function(d) {
+            }).on("click", function(d) {
                 dotMode = true
-                if (curNeighborhood) {
-                    curNeighborhood = d.properties.nhood.replaceAll(' ', '_')
-                    neighborhoodSelect.property("value", curNeighborhood);
-                }
-                //TODO: update map based on these properties
                 let centerPoint = turf.center(d).geometry.coordinates
                 map.setView([centerPoint[1], centerPoint[0]], 14);
+                if (curNeighborhood) {
+                    curNeighborhood = (d.properties.nhood + "-" + d.properties.name)
+                        .replaceAll(' ', '_')
+                    neighborhoodSelect.property("value", curNeighborhood 
+                        + "/" + centerPoint[1] + "/" + centerPoint[0]);
+                }
+                //TODO: update map based on these properties
             });
         
         // add text scale for sizing up based on boundaries of the svg
         let textScale = d3.scaleLinear()
             .domain([0, 15000])
-            .range([6, 22]);
+            .range([6, 24]);
         labels.text(function(d){
-                return d.properties.nhood;
+                return d.properties.nhood + "-" + d.properties.name;
             })
             .attr("x", function(d){
                 return pathCreator.centroid(d)[0];
@@ -152,8 +165,8 @@ d3.json("neighborhoods.geojson")
                 return  pathCreator.centroid(d)[1];
             })
             .attr("class", function(d) {
-                if (d.properties.nhood) {
-                    return d.properties.nhood.replaceAll(' ', '_')
+                if (d.properties.nhood && d.properties.name) {
+                    return (d.properties.nhood + "-" + d.properties.name).replaceAll(' ', '_')
                 }
             })
             .style("display", "none")
