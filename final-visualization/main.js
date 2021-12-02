@@ -1,5 +1,15 @@
 var curMonthRange = [3, 10]
 var curPersonRange = [2, 6]
+var dotMode = false
+var curNeighborhood = "all"
+
+// Global function called when select element is changed
+function onNeighborhoodChanged() {
+    var select = d3.select('#neighborhood_select').node();
+    // Get current value of select element
+    curNeighborhood = select.options[select.selectedIndex].value;
+    // TODO: Update chart here -- will need to handle value "all"
+}
 
 function dataPreprocessor(row) {
     return {
@@ -28,8 +38,34 @@ tileLayer.addTo(map)
 var svg = d3.select(map.getPanes().overlayPane).append("svg"),
 g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
+var neighborhoodSelect = d3.select("#neighborhood_select")
+
+var backButton = d3.select('#back_button').style("margin", "10px")
+    .on('click', function(){
+        dotMode = false
+        // TODO: Update chart here
+        map.setView([47.6062, -122.3321], 11);
+        neighborhoodSelect.property("value", "all");
+});
+
 d3.json("neighborhoods.geojson")
   .then(function(neighborhoods) {
+    // Set up neighborhood select
+    let neighborhoodList = [...new Set(neighborhoods.features.map((feature) => {
+        let n = feature.properties.nhood
+        if (n) return n
+    }))]
+    neighborhoodSelect.selectAll("option").data(neighborhoodList)
+        .enter().append("option").attr("value", function(n) {
+            if (typeof n !== 'undefined') {
+                return n.replaceAll(' ', '_')
+            }
+        }).text(function(n) {
+            if (typeof n !== 'undefined') {
+                return n
+            }
+        })
+
     // Used to draw SVG paths alongside Leaflet
     const projectPoint = function(x, y) {
         const point = map.latLngToLayerPoint(new L.LatLng(y, x))
@@ -90,6 +126,16 @@ d3.json("neighborhoods.geojson")
                         d3.selectAll('.' + d.properties.nhood.replaceAll(' ', '_'))
                             .style("display", "none")
                     }
+            })
+            .on("click", function(d) {
+                dotMode = true
+                if (curNeighborhood) {
+                    curNeighborhood = d.properties.nhood.replaceAll(' ', '_')
+                    neighborhoodSelect.property("value", curNeighborhood);
+                }
+                //TODO: update map based on these properties
+                let centerPoint = turf.center(d).geometry.coordinates
+                map.setView([centerPoint[1], centerPoint[0]], 14);
             });
         
         // add text scale for sizing up based on boundaries of the svg
@@ -118,7 +164,7 @@ d3.json("neighborhoods.geojson")
     console.log(error)
 });
 
-d3.csv("../Collisions 2.csv").then(function(dataset) {
+d3.csv("../collisions 2.csv").then(function(dataset) {
     dataset = dataset.slice(0, 100);
     
     collisions = dataset.filter(item => item.X != "" || item.Y != "")
