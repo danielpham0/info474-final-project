@@ -164,7 +164,7 @@ d3.json("neighborhoods.geojson")
     console.log(error)
 });
 
-d3.csv("../collisions 2.csv").then(function(dataset) {
+d3.csv("collisions.csv").then(function(dataset) {
     dataset = dataset.slice(0, 100);
     
     collisions = dataset.filter(item => item.X != "" || item.Y != "")
