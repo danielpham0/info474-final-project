@@ -1,3 +1,6 @@
+var curMonthRange = [3, 10]
+var curPersonRange = [2, 6]
+
 function dataPreprocessor(row) {
     return {
         X: row.X,
@@ -153,5 +156,73 @@ d3.csv("../Collisions 2.csv").then(function(dataset) {
         .attr("cy", d => map.latLngToLayerPoint([d.Y,d.Y]).y)
   
     map.on("zoomed", update)
-});
 
+    // DANIEL's SLIDERS
+    // Month Slider
+    var margin = 5,
+        width = 400 - margin * 2,
+        height = 20;
+    var monthX = d3.scaleLinear()
+        .domain([1,12])
+        .range([0, width]);
+    var monthBrush = d3.brushX()
+        .extent([[0,0], [width,height]])
+        .on("brush", brushed);
+    var monthSvg = d3.select("#month_slider").append("svg")
+        .attr("width", width + margin * 2)
+        .attr("height", height + margin)
+      .append("g")
+        .attr("transform", "translate(" + margin + "," + margin + ")")
+        .call(d3.axisBottom()
+            .scale(monthX)
+            .ticks(12));
+    var monthBrushg = monthSvg.append("g")
+        .attr("class", "monthBrush")
+        .call(monthBrush)
+    monthBrush.move(monthBrushg, curMonthRange.map(monthX));
+    // Person Slider
+    var personX = d3.scaleLinear()
+        .domain([0,8])
+        .range([0, width]);
+    var personBrush = d3.brushX()
+        .extent([[0,0], [width,height]])
+        .on("brush", brushed);
+    var personSvg = d3.select("#person_slider").append("svg")
+        .attr("width", width + margin * 2)
+        .attr("height", height + margin)
+      .append("g")
+        .attr("transform", "translate(" + margin + "," + margin + ")")
+        .call(d3.axisBottom()
+            .scale(personX)
+            .ticks(5));
+    var personBrushg = personSvg.append("g")
+        .attr("class", "personBrush")
+        .call(personBrush)
+    personBrush.move(personBrushg, curPersonRange.map(personX));
+    
+    // How we handle changes in both
+    // TODO: Add an update chart function here which takes those ranges into account
+    // brush runs immediately so we can just call it here with curMonthRange and curPersonRange
+    function brushed() {
+        if ($(this).hasClass("monthBrush")) {
+            var range = d3.brushSelection(this)
+                .map(monthX.invert);
+            d3.select("#month_span")
+            .text(function(d, i) {
+                return "Month Range: " + 
+                    Math.round(range[0]) + ' to ' + Math.round(range[1])
+            })
+            curMonthRange = [Math.round(range[0]), Math.round(range[1])]
+        }
+        else if ($(this).hasClass("personBrush")) {
+            var range = d3.brushSelection(this)
+                .map(personX.invert);
+            d3.select("#person_span")
+                .text(function(d) {
+                    return "Person Range: " +
+                        Math.round(range[0]) + ' to ' + Math.round(range[1])
+                })
+            curPersonRange = [Math.round(range[0]), Math.round(range[1])]
+        }
+    }
+});
