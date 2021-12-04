@@ -80,9 +80,11 @@ d3.json("neighborhoods.geojson")
 });
 
 d3.csv("../Collisions 2.csv").then(function(dataset) {
-    dataset = dataset.slice(0, 100);
+    dataset = dataset.slice(0, 10);
     
     collisions = dataset.filter(item => item.X != "" || item.Y != "")
+    collisions.forEach(element => console.log(element));
+    console.log(collisions[0])
     const overlay = d3.select(map.getPanes().overlayPane)
     const svg1 = overlay.select('svg').attr("pointer-events", "auto")
     
