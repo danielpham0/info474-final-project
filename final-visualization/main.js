@@ -177,6 +177,20 @@ d3.json("neighborhoods.geojson")
     console.log(error)
 });
 
+// Kevin's stacked bar chart
+var margin = {top: 10, right: 30, bottom: 20, left: 50},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg2 = d3.select("#collisionGraph1")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
 d3.csv("collisions.csv").then(function(dataset) {
     dataset = dataset.slice(0, 100);
     
@@ -215,6 +229,59 @@ d3.csv("collisions.csv").then(function(dataset) {
         .attr("cy", d => map.latLngToLayerPoint([d.Y,d.Y]).y)
   
     map.on("zoomed", update)
+
+    // Kevin's stacked bar chart
+    // List of subgroups, which are the unique severity descriptions
+    //var subgroups = d3.map(dataset, function(d) {return(d.SEVDESC)})
+    var subgroups = [...new Set(dataset.SEVDESC)]
+    console.log(subgroups);
+
+    // List of groups = value of the first column called group -> I show them on the X axis
+    // NEEDS FIX, how to get unique, individual collision types?
+    //var groups = d3.map(dataset, function(d){return(d.COLTYPE)}).keys()
+    var groups = [...new Set(dataset.COLTYPE)];
+
+    // Add X axis
+    var x = d3.scaleBand()
+        .domain(groups)
+        .range([0, width])
+        .padding([0.2])
+    svg2.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickSizeOuter(0));
+    
+      // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, 60])
+      .range([ height, 0 ]);
+      svg2.append("g")
+      .call(d3.axisLeft(y));
+  
+    // color palette = one color per subgroup
+    var color = d3.scaleOrdinal()
+      .domain(subgroups)
+      .range(['#e41a1c','#377eb8','#4daf4a', '#BF40BF'])
+  
+    //stack the data? --> stack per subgroup
+    var stackedData = d3.stack()
+      .keys(subgroups)
+      (dataset)
+  
+    // Show the bars
+    svg2.append("g")
+      .selectAll("g")
+      // Enter in the stack data = loop key per key = group per group
+      .data(stackedData)
+      .enter().append("g")
+        .attr("fill", function(d) { return color(d.key); })
+        .selectAll("rect")
+        // enter a second time = loop subgroup per subgroup to add all rectangles
+        .data(function(d) { return d; })
+        .enter().append("rect")
+          .attr("x", function(d) { return x(d.dataset.COLTYPE); })
+          .attr("y", function(d) { return y(d[1]); })
+          .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+          .attr("width",x.bandwidth())
 
     // DANIEL's SLIDERS
     // Month Slider
