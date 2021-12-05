@@ -97,7 +97,7 @@ d3.json("neighborhoods.geojson")
         .append("svg:text")
 
     
-    // Listends to changes in map and calls a reset when necessary
+    // Listens to changes in map and calls a reset when necessary
     map.on("viewreset", reset);
 
     // Init for the map
@@ -231,15 +231,52 @@ d3.csv("collisions.csv").then(function(dataset) {
     map.on("zoomed", update)
 
     // Kevin's stacked bar chart
-    // List of subgroups, which are the unique severity descriptions
+    // Array of subgroups, which are the unique severity descriptions
     //var subgroups = d3.map(dataset, function(d) {return(d.SEVDESC)})
-    var subgroups = [...new Set(dataset.SEVDESC)]
-    console.log(subgroups);
+    //var subgroups = [...new Set(dataset.SEVERITYDESC)]
+    //console.log(dataset.SEVDESC)
+
+    var subgroups = [];
+    for (let i = 0; i < dataset.length; i++) {
+        if (subgroups.includes(dataset[i].SEVERITYDESC)) {
+            subgroups.push();
+        } else {
+            subgroups.push(dataset[i].SEVERITYDESC);
+        }
+    }
 
     // List of groups = value of the first column called group -> I show them on the X axis
     // NEEDS FIX, how to get unique, individual collision types?
     //var groups = d3.map(dataset, function(d){return(d.COLTYPE)}).keys()
-    var groups = [...new Set(dataset.COLTYPE)];
+    var groups = [];
+    for (let i = 0; i < dataset.length; i++) {
+        if (groups.includes(dataset[i].COLLISIONTYPE)) {
+            groups.push();
+        } else {
+            groups.push(dataset[i].COLLISIONTYPE);
+        }
+    }
+
+    // Create counter for each of the severity descriptions.
+    sev1_count = 0;
+    sev2_count = 0;
+    sev3_count = 0;
+    sev4_count = 0;
+    for (let i = 0; i < dataset.length; i++) {
+        if (dataset[i].SEVERITYDESC == subgroups[0]) {
+            sev1_count++;
+        } else if (dataset[i].SEVERITYDESC == subgroups[1]) {
+            sev2_count++;
+        } else if (dataset[i].SEVERITYDESC == subgroups[2]) {
+            sev3_count++;
+        } else {
+            sev4_count++;
+        }
+    }
+
+    var subgroup_counts = [sev1_count, sev2_count, sev3_count, sev4_count];
+
+
 
     // Add X axis
     var x = d3.scaleBand()
