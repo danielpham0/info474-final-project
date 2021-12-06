@@ -191,8 +191,8 @@ var svg2 = d3.select("#collisionGraph1")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("collisions.csv").then(function(dataset) {
-    dataset = dataset.slice(0, 100);
+d3.csv("test_collisions_n.csv").then(function(dataset) {
+    // dataset = dataset.slice(0, 100);
     
     collisions = dataset.filter(item => item.X != "" || item.Y != "")
     const overlay = d3.select(map.getPanes().overlayPane)
@@ -210,7 +210,7 @@ d3.csv("collisions.csv").then(function(dataset) {
                         //Finally, the returned conversion produces an x and y point. We have to select the the desired one using .x or .y
                         .attr("cx", d => map.latLngToLayerPoint([d.Y,d.X]).x)
                         .attr("cy", d => map.latLngToLayerPoint([d.Y,d.X]).y)
-                        .attr("r", 5)
+                        .attr("r", 3)
                         .on('mouseover', function() { //function to add mouseover event
                             d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
                               .duration('150') //how long we are transitioning between the two states (works like keyframes)
@@ -279,46 +279,46 @@ d3.csv("collisions.csv").then(function(dataset) {
     console.log(subgroup_counts)
 
     // Add X axis
-    var x = d3.scaleBand()
-        .domain(groups)
-        .range([0, width])
-        .padding([0.2])
-    svg2.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0));
+    // var x = d3.scaleBand()
+    //     .domain(groups)
+    //     .range([0, width])
+    //     .padding([0.2])
+    // svg2.append("g")
+    //     .attr("transform", "translate(0," + height + ")")
+    //     .call(d3.axisBottom(x).tickSizeOuter(0));
     
-      // Add Y axis
-    var y = d3.scaleLinear()
-      .domain([0, 60])
-      .range([ height, 0 ]);
-      svg2.append("g")
-      .call(d3.axisLeft(y));
+    //   // Add Y axis
+    // var y = d3.scaleLinear()
+    //   .domain([0, 60])
+    //   .range([ height, 0 ]);
+    //   svg2.append("g")
+    //   .call(d3.axisLeft(y));
   
-    // color palette = one color per subgroup
-    var color = d3.scaleOrdinal()
-      .domain(subgroups)
-      .range(['#e41a1c','#377eb8','#4daf4a', '#BF40BF'])
+    // // color palette = one color per subgroup
+    // var color = d3.scaleOrdinal()
+    //   .domain(subgroups)
+    //   .range(['#e41a1c','#377eb8','#4daf4a', '#BF40BF'])
   
-    //stack the data? --> stack per subgroup
-    var stackedData = d3.stack()
-      .keys(subgroups)
-      (dataset)
-    console.log(stackedData)
+    // //stack the data? --> stack per subgroup
+    // var stackedData = d3.stack()
+    //   .keys(subgroups)
+    //   (dataset)
+    // console.log(stackedData)
     // Show the bars
-    svg2.append("g")
-      .selectAll("g")
-      // Enter in the stack data = loop key per key = group per group
-      .data(stackedData)
-      .enter().append("g")
-        .attr("fill", function(d) { return color(d.key); })
-        .selectAll("rect")
-        // enter a second time = loop subgroup per subgroup to add all rectangles
-        .data(function(d) { return d; })
-        .enter().append("rect")
-          .attr("x", function(d) { return x(d.data.COLLISIONTYPE); })
-          .attr("y", function(d) { return y(d[1]); })
-          .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-          .attr("width",x.bandwidth())
+    // svg2.append("g")
+    //   .selectAll("g")
+    //   // Enter in the stack data = loop key per key = group per group
+    //   .data(stackedData)
+    //   .enter().append("g")
+    //     .attr("fill", function(d) { return color(d.key); })
+    //     .selectAll("rect")
+    //     // enter a second time = loop subgroup per subgroup to add all rectangles
+    //     .data(function(d) { return d; })
+    //     .enter().append("rect")
+    //       .attr("x", function(d) { return x(d.data.COLLISIONTYPE); })
+    //       .attr("y", function(d) { return y(d[1]); })
+    //       .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+    //       .attr("width",x.bandwidth())
 
     // DANIEL's SLIDERS
     // Month Slider
