@@ -275,8 +275,8 @@ d3.csv("collisions.csv").then(function(dataset) {
     }
 
     var subgroup_counts = [sev1_count, sev2_count, sev3_count, sev4_count];
-
-
+    console.log(groups)
+    console.log(subgroup_counts)
 
     // Add X axis
     var x = d3.scaleBand()
@@ -303,7 +303,7 @@ d3.csv("collisions.csv").then(function(dataset) {
     var stackedData = d3.stack()
       .keys(subgroups)
       (dataset)
-  
+    console.log(stackedData)
     // Show the bars
     svg2.append("g")
       .selectAll("g")
@@ -315,7 +315,7 @@ d3.csv("collisions.csv").then(function(dataset) {
         // enter a second time = loop subgroup per subgroup to add all rectangles
         .data(function(d) { return d; })
         .enter().append("rect")
-          .attr("x", function(d) { return x(d.dataset.COLTYPE); })
+          .attr("x", function(d) { return x(d.data.COLLISIONTYPE); })
           .attr("y", function(d) { return y(d[1]); })
           .attr("height", function(d) { return y(d[0]) - y(d[1]); })
           .attr("width",x.bandwidth())
