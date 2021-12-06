@@ -360,7 +360,6 @@ var backButton = d3.select('#back_button').style("margin", "10px")
         map.setView([47.6062, -122.3321], 11);
         neighborhoodSelect.property("value", ALL_NEIGHBORHOODS + "/47.6062/-122.3321");
         curNeighborhood = ALL_NEIGHBORHOODS
-        console.log(dotMode)
         updateChart()
 });
 // Select neighborhood item - used to swap between neighborhoods
@@ -471,5 +470,5 @@ function getNeighValue(neighborhoodName) {
 function setMode(mode) {
     dotMode = mode
     var mode_switch = d3.select('#mode_switch');
-    dotMode = mode_switch.property('checked', mode)
+    mode_switch.property('checked', mode)
 }
