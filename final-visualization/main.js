@@ -140,7 +140,7 @@ d3.json("neighborhoods.geojson")
                     getNeighValue(fullName))
                     .style("display", "none")
             }).on("click", function(d) {
-                dotMode = true
+                setMode(true)
                 let centerPoint = turf.center(d).geometry.coordinates
                 map.setView([centerPoint[1], centerPoint[0]], 14);
                 if (curNeighborhood) {
@@ -356,10 +356,11 @@ function updateChart() {
 // Button to return to general view - goes back to center
 var backButton = d3.select('#back_button').style("margin", "10px")
     .on('click', function(){
-        dotMode = false
+        setMode(false)
         map.setView([47.6062, -122.3321], 11);
         neighborhoodSelect.property("value", ALL_NEIGHBORHOODS + "/47.6062/-122.3321");
         curNeighborhood = ALL_NEIGHBORHOODS
+        console.log(dotMode)
         updateChart()
 });
 // Select neighborhood item - used to swap between neighborhoods
@@ -372,14 +373,20 @@ function onNeighborhoodChanged() {
     n = select.options[select.selectedIndex].value.split("/");
     curNeighborhood = getNeighValue(n[0])
     neighborhoodCenter = [parseFloat(n[1]),parseFloat(n[2])]
-    dotMode = true
+    setMode(true)
     if (curNeighborhood == ALL_NEIGHBORHOODS) {
         zoom = 11
-        dotMode = false
+        setMode(false)
     }
     // on select go to that area
     map.setView(neighborhoodCenter, zoom);
     // update the chart so that dots are translated accordingly
+    updateChart()
+}
+// Swaps between which mode we want the chart to be in dot vs bubble
+function onModeChanged() {
+    var mode_switch = d3.select('#mode_switch');
+    dotMode = mode_switch.property('checked')
     updateChart()
 }
 // Month Slider - allows us to adjust which months we're filtering over
@@ -459,4 +466,10 @@ function getNeighName(dNhood, dName) {
 // returns correctly formatted neighborhood name for values, eliminating spaces and making items uniform
 function getNeighValue(neighborhoodName) {
     return neighborhoodName.replaceAll(' ', '_').toLowerCase()
+}
+// sets the mode of the switch upon other changes to dotMode
+function setMode(mode) {
+    dotMode = mode
+    var mode_switch = d3.select('#mode_switch');
+    dotMode = mode_switch.property('checked', mode)
 }
