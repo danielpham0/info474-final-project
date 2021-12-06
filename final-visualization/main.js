@@ -11,6 +11,7 @@ const ALL_NEIGHBORHOODS = "all_neighborhoods"
 var curMonthRange = [3, 10]
 var curPersonRange = [2, 6]
 var dotMode = false
+var dragMode = false
 var curNeighborhood = ALL_NEIGHBORHOODS
 var boundShift = [0,0]
 // Initialize scale variables
@@ -122,6 +123,7 @@ d3.json("neighborhoods.geojson")
         
         // Initialize each path with its attributes
         areaPaths.attr("d", pathCreator)
+            .attr('class', 'neighborhoodPath')
             .attr('fill-opacity', 0.3)
             .attr('stroke', 'black')
             .attr("z-index", 3000)
@@ -140,6 +142,7 @@ d3.json("neighborhoods.geojson")
                     getNeighValue(fullName))
                     .style("display", "none")
             }).on("click", function(d) {
+                if (dragMode) {return}
                 setMode(true)
                 let centerPoint = turf.center(d).geometry.coordinates
                 map.setView([centerPoint[1], centerPoint[0]], 14);
@@ -388,6 +391,16 @@ function onModeChanged() {
     dotMode = mode_switch.property('checked')
     updateChart()
 }
+// Swaps between whether we want to drag to explore the map or select to explore
+function onDragChanged() {
+    var drag_switch = d3.select('#drag_switch');
+    dragMode = drag_switch.property('checked')
+    if (dragMode) {
+        d3.selectAll('.neighborhoodPath').attr("pointer-events", "none")
+    } else {
+        d3.selectAll('.neighborhoodPath').attr("pointer-events", "auto")
+    }
+}
 // Month Slider - allows us to adjust which months we're filtering over
 var margin = 5,
 width = 400 - margin * 2,
@@ -466,7 +479,7 @@ function getNeighName(dNhood, dName) {
 function getNeighValue(neighborhoodName) {
     return neighborhoodName.replaceAll(' ', '_').toLowerCase()
 }
-// sets the mode of the switch upon other changes to dotMode
+// sets the mode of the switch and dotMode given a boolean for the map mode
 function setMode(mode) {
     dotMode = mode
     var mode_switch = d3.select('#mode_switch');
