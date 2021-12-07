@@ -182,7 +182,7 @@ d3.json("neighborhoods.geojson")
 });
 
 // LOAD COLLISIONS DATA AND UPDATE VISUALIZATION WITH MAP AND BARCHARTS
-d3.csv("collisions_n.csv").then(function(collection) {
+d3.csv("test_collisions_n.csv").then(function(collection) {
     // Initialize the map chart
     dataset = collection
     updateChart()
@@ -352,6 +352,9 @@ function updateChart() {
                               .attr('r', function(d) {
                                 if(dotMode) {return 4}
                                 return radius(d.COL_COUNT) })
+                          })
+                          .on('click', function(d) {
+                              
                           });
 }
 
