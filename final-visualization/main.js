@@ -182,121 +182,100 @@ d3.json("neighborhoods.geojson")
 });
 
 // LOAD COLLISIONS DATA AND UPDATE VISUALIZATION WITH MAP AND BARCHARTS
-d3.csv("collisions_n.csv").then(function(collection) {
+d3.csv("test_collisions_n.csv").then(function(collection) {
     // Initialize the map chart
     dataset = collection
     updateChart()
 
-    // Handle all barchart calculations and handling
-    var subgroups = [];
-    for (let i = 0; i < dataset.length; i++) {
-        if (subgroups.includes(dataset[i].SEVERITYDESC)) {
-            subgroups.push();
-        } else {
-            subgroups.push(dataset[i].SEVERITYDESC);
+    // Stacked bar chart
+    var collisionTypeCounts = dataset.reduce((res, col) => {
+        var collType = col.COLLISIONTYPE;
+        if (!res.hasOwnProperty(collType)) {
+            res[collType] = {
+                "Injury Collision": 0,
+                "Unknown": 0,
+                "Property Damage Only Collision": 0,
+                "Serious Injury Collision": 0
+            }
         }
-    }
+        res[collType][col.SEVERITYDESC]++;
+        return res;
+    }, {});
+
+    // reformat collisions to be readable by d3
+    collTypeData = Object.keys(collisionTypeCounts).map(k => {
+        let cur = collisionTypeCounts[k]
+        return{"COLLISION_TYPE": k, "INJURY_COUNT": cur["Injury Collision"], "UNKNOWN_COUNT": cur["Unknown"], "PROPERTY_DAMAGE_COUNT": cur["Property Damage Only Collision"], "SERIOUS_INJURY_COUNT": cur["Serious Injury Collision"]}
+    });
+
+    console.log(collTypeData);
+
+
+    var subgroups = ["INJURY_COUNT", "UNKNOWN_COUNT", "PROPERTY_DAMAGE_COUNT", "SERIOUS_INJURY_COUNT"]
+    console.log(subgroups);
+
+    var groups = collTypeData.map(function(d) {
+            return d.COLLISION_TYPE;
+        })
+    console.log(groups);
+
+    // Handle all barchart calculations and handling
+    // var subgroups = [];
+    // for (let i = 0; i < dataset.length; i++) {
+    //     if (subgroups.includes(dataset[i].SEVERITYDESC)) {
+    //         subgroups.push();
+    //     } else {
+    //         subgroups.push(dataset[i].SEVERITYDESC);
+    //     }
+    // }
 
     // List of groups = value of the first column called group -> I show them on the X axis
     // NEEDS FIX, how to get unique, individual collision types?
     //var groups = d3.map(dataset, function(d){return(d.COLTYPE)}).keys()
-    var groups = [];
-    for (let i = 0; i < dataset.length; i++) {
-        if (groups.includes(dataset[i].COLLISIONTYPE)) {
-            groups.push();
-        } else {
-            groups.push(dataset[i].COLLISIONTYPE);
-        }
-    }
-
-    // Create counter for each of the severity descriptions.
-    sev1_count = 0;
-    sev2_count = 0;
-    sev3_count = 0;
-    sev4_count = 0;
-    for (let i = 0; i < dataset.length; i++) {
-        if (dataset[i].SEVERITYDESC == subgroups[0]) {
-            sev1_count++;
-        } else if (dataset[i].SEVERITYDESC == subgroups[1]) {
-            sev2_count++;
-        } else if (dataset[i].SEVERITYDESC == subgroups[2]) {
-            sev3_count++;
-        } else {
-            sev4_count++;
-        }
-    }
-
-    var subgroup_counts = [sev1_count, sev2_count, sev3_count, sev4_count];
 
     // Add X axis
     var x = d3.scaleBand()
-        .domain(groups)
-        .range([0, width])
-        .padding([0.2])
+    .domain(groups)
+    .range([0, width])
+    .padding([0.2])
     svg2.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0));
-    
-      // Add Y axis
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickSizeOuter(0));
+
+    // Add Y axis
     var y = d3.scaleLinear()
-      .domain([0, 60])
-      .range([ height, 0 ]);
-    svg.append("g")
-      .call(d3.axisLeft(y));
-  
+    .domain([0, 60])
+    .range([ height, 0 ]);
+    svg2.append("g")
+    .call(d3.axisLeft(y));
+
     // color palette = one color per subgroup
     var color = d3.scaleOrdinal()
-      .domain(subgroups)
-      .range(['#e41a1c','#377eb8','#4daf4a', '#BF40BF'])
+    .domain(subgroups)
+    .range(['#e41a1c','#377eb8','#4daf4a'])
 
-    var data = new Map();
-    for (let i = 0; i < subgroups.length; i++) {
-        data.set('group', groups)
-        data.set(subgroups[i], subgroup_counts[i])
-      }
-  
-    // stack the data? --> stack per subgroup
-    // group -> col type
-    // subgroup -> sev desc
+    //stack the data? --> stack per subgroup
     var stackedData = d3.stack()
-      .keys(subgroups)
-      (dataset)
-    console.log(stackedData)
+    .keys(subgroups)
+    (collTypeData)
+
     // Show the bars
-<<<<<<< HEAD
     svg2.append("g")
-      .selectAll("g")
-      // Enter in the stack data = loop key per key = group per group
-      .data(stackedData)
-      .enter().append("g")
-        .attr("fill", function(d) {
-            return color(d.key); })
+    .selectAll("g")
+    // Enter in the stack data = loop key per key = group per group
+    .data(stackedData)
+    .enter().append("g")
+        .attr("fill", function(d) { return color(d.key); })
         .selectAll("rect")
         // enter a second time = loop subgroup per subgroup to add all rectangles
         .data(function(d) { return d; })
         .enter().append("rect")
-          .attr("x", function(d) { 
-              //console.log(d);
-              return x(d.data.COLLISIONTYPE); })
-          .attr("y", function(d) { return y(d[1]); })
-          .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-          .attr("width",x.bandwidth())
-=======
-    // svg2.append("g")
-    //   .selectAll("g")
-    //   // Enter in the stack data = loop key per key = group per group
-    //   .data(stackedData)
-    //   .enter().append("g")
-    //     .attr("fill", function(d) { return color(d.key); })
-    //     .selectAll("rect")
-    //     // enter a second time = loop subgroup per subgroup to add all rectangles
-    //     .data(function(d) { return d; })
-    //     .enter().append("rect")
-    //       .attr("x", function(d) { return x(d.data.COLLISIONTYPE); })
-    //       .attr("y", function(d) { return y(d[1]); })
-    //       .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-    //       .attr("width",x.bandwidth())
+        .attr("x", function(d) { return x(d.data.group); })
+        .attr("y", function(d) { return y(d[1]); })
+        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+        .attr("width",x.bandwidth())
 });
+
 
 // UPDATE CHART FUNCTION BASED ON CHANGES IN INTERACTIVE VARIABLES TRACKED GLOBALLY
 function updateChart() {
@@ -379,9 +358,11 @@ function updateChart() {
                               .attr('r', function(d) {
                                 if(dotMode) {return 4}
                                 return radius(d.COL_COUNT) })
+                          })
+                          .on('click', function(d) {
+                              
                           });
 }
->>>>>>> 2988e87cd2c026093ac37a50a8c1913160446aac
 
 // INTERACTIVE TOOLS
 // Button to return to general view - goes back to center
