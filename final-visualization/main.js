@@ -208,15 +208,11 @@ d3.csv("test_collisions_n.csv").then(function(collection) {
         return{"COLLISION_TYPE": k, "INJURY_COUNT": cur["Injury Collision"], "UNKNOWN_COUNT": cur["Unknown"], "PROPERTY_DAMAGE_COUNT": cur["Property Damage Only Collision"], "SERIOUS_INJURY_COUNT": cur["Serious Injury Collision"]}
     });
 
-    console.log(collTypeData);
-
-
     var subgroups = ["INJURY_COUNT", "UNKNOWN_COUNT", "PROPERTY_DAMAGE_COUNT", "SERIOUS_INJURY_COUNT"]
-    console.log(subgroups);
 
-    var groups = d3.map(collTypeData, function(d){
-            return d.COLLISION_TYPE }).keys()
-    console.log(groups);
+    var groups = collTypeData.map(function(d){
+            return d.COLLISION_TYPE })
+    // console.log(groups);
 
       // Add X axis
   var x = d3.scaleBand()
@@ -307,8 +303,34 @@ d3.csv("test_collisions_n.csv").then(function(collection) {
 
     var subgroup_counts = [sev1_count, sev2_count, sev3_count, sev4_count];
 
-    console.log(subgroups);
-
+    // calculate general analytics for the collisions
+    let maxW = 0, wDict = {}, W = ''
+    let maxC = 0, cDict = {}, C = ''
+    for (col of collection) {
+        if (!cDict.hasOwnProperty(col.ROADCOND)) {
+            cDict[col.ROADCOND] = 0 }
+        cDict[col.ROADCOND]++;
+        if (cDict[col.ROADCOND] > maxC) {
+            maxC = cDict[col.ROADCOND]
+            C = col.ROADCOND }
+        if (!wDict.hasOwnProperty(col.WEATHER))
+            wDict[col.WEATHER] = 0
+        wDict[col.WEATHER]++;
+        if (wDict[col.WEATHER] > maxW) {
+            maxW = wDict[col.WEATHER]
+            W = col.WEATHER }
+    }
+    // Initialize analytics card wit hinformation
+    d3.select('#analytics_loc').text("Neighborhood: All Collisions (Unfiltered)")
+    d3.select('#analytics_num').text("Collisions: " + collection.length)
+    d3.select('#analytics_sev').text("Most Common Road Condition: " + C
+        + " (" + Math.round(maxC/collection.length*100) +"%)")
+    d3.select('#analytics_cond').text("Most Common Weather: " + W 
+        + " (" + Math.round(maxW/collection.length*100) +"%)")
+    map.setView([47.6062, -122.3321], 11);
+    d3.select('#analytics_loc_btn').on('click', function(){
+        map.setView([47.6062, -122.3321], 11);
+    })
 });
 
 
@@ -318,7 +340,7 @@ function updateChart() {
     // necessary for size scale of bubbles
     let maxCollisions = 0
     // filters through collisions based on filters
-    var collisions = dataset.filter(function(d) {
+    var filteredCollisions = dataset.filter(function(d) {
         let date = new Date(d.INCDTTM)
         let month = date.getMonth()
         return d.PERSONCOUNT >= curPersonRange[0] && d.PERSONCOUNT <= curPersonRange[1] && 
@@ -327,27 +349,36 @@ function updateChart() {
             month >= curMonthRange[0] && month <= curMonthRange[1]
     })
     // generates collision counts in each neighborhood dependent on that filtered data
-    var neighborhoodColCounts = collisions.reduce((res, col) => {
+    var neighborhoodColCounts = filteredCollisions.reduce((res, col) => {
         var nName = getNeighValue(col.NEIGHBORHOOD)
         if (!res.hasOwnProperty(nName)) {
             neighborhoodList.push(nName)
             res[nName] = {'COL_COUNT': 0,
                 'X': col.NX,
-                'Y': col.NY
+                'Y': col.NY,
+                'WEATHER': {},
+                'ROADCOND': {}
             };
-            res[nName]['X'] = col.NX
-            res[nName]['Y'] = col.NY
+        }
+        if (!res[nName]['WEATHER'].hasOwnProperty(col.WEATHER)) {
+            res[nName]['WEATHER'][col.WEATHER] = 0
+        }
+        if (!res[nName]['ROADCOND'].hasOwnProperty(col.ROADCOND)) {
+            res[nName]['ROADCOND'][col.ROADCOND] = 0
         }
         maxCollisions = Math.max(res[nName]['COL_COUNT'], maxCollisions)
         res[nName]['COL_COUNT']++;
+        res[nName]['WEATHER'][col.WEATHER]++;
+        res[nName]['ROADCOND'][col.ROADCOND]++;
         return res;
     }, {});
     // reformat collision counts to be readable by d3
     neighborhoodData = Object.keys(neighborhoodColCounts).map(k => {
         let cur = neighborhoodColCounts[k]
-        return {'NEIGHBORHOOD': k, 'COL_COUNT': cur['COL_COUNT'], 'X': cur['X'], 'Y': cur['Y']};});
+        return {'NEIGHBORHOOD': k, 'COL_COUNT': cur['COL_COUNT'], 'X': cur['X'], 'Y': cur['Y'], 
+            'WEATHER': cur['WEATHER'], 'ROADCOND': cur['ROADCOND']};});
     // use the dataset we require for dot mode
-    collisions = !dotMode ? neighborhoodData : collisions
+    var collisions = !dotMode ? neighborhoodData : filteredCollisions
 
     // CREATE SCALES FOR EACH DOT ATTRIBUTE
     // radius of dot based on number of collisions
@@ -393,7 +424,81 @@ function updateChart() {
                               .attr('r', function(d) {
                                 if(dotMode) {return 4}
                                 return radius(d.COL_COUNT) })
+                          })
+                          .on('click', function(d) {
+                            console.log(d)
+                            if(!dotMode) {
+                                // NEIGHBORHOOD
+                                let n = d.NEIGHBORHOOD.toLowerCase().split(/_|-/)
+                                    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                                    .join(' ');                  
+                                d3.select('#analytics_loc').text("Neighborhood: " + n)
+                                d3.select('#analytics_num').text("Collisions: " + d.COL_COUNT)
+                                // ROAD CONDITION ANALYTICS
+                                let maxC = 0, C = ''
+                                for (k of Object.keys(d.ROADCOND)) {
+                                    if (d.ROADCOND[k] > maxC) {
+                                        maxC = d.ROADCOND[k]
+                                        C = k }
+                                }
+                                d3.select('#analytics_sev').text("Most Common Road Condition: " + C
+                                    + " (" + Math.round(maxC/d.COL_COUNT*100) +"%)")
+                                // WEATHER ANALYTICS
+                                let maxW = 0, W = ''
+                                for (k of Object.keys(d.WEATHER)) {
+                                    if (d.WEATHER[k] > maxW) {
+                                        maxW = d.WEATHER[k]
+                                        W = k }
+                                }
+                                d3.select('#analytics_cond').text("Most Common Weather: " + W 
+                                    + " (" + Math.round(maxW/d.COL_COUNT*100) +"%)")
+                                // SETS LOCATION BUTTON
+                                d3.select('#analytics_loc_btn').on('click', function(){
+                                    map.setView([d.Y, d.X], 16);
+                                })
+                            } else {
+                                let l = d.LOCATION.toLowerCase().split(' ')
+                                    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                                    .join(' ');     
+                                d3.select('#analytics_loc').text("Address: " + l)
+                                d3.select('#analytics_num').text("People Involved: " + d.PERSONCOUNT)
+                                d3.select('#analytics_sev').text("Severity: " + d.SEVERITYDESC)
+                                d3.select('#analytics_cond').text("Weather: " + d.WEATHER)
+                                d3.select('#analytics_loc_btn').on('click', function(){
+                                    map.setView([d.Y, d.X], 18);
+                                })
+                            }
                           });
+
+    // calculate general analytics for the filtered collisions
+    let maxW = 0, wDict = {}, W = ''
+    let maxC = 0, cDict = {}, C = ''
+    for (col of filteredCollisions) {
+        if (!cDict.hasOwnProperty(col.ROADCOND)) {
+            cDict[col.ROADCOND] = 0 }
+        cDict[col.ROADCOND]++;
+        if (cDict[col.ROADCOND] > maxC) {
+            maxC = cDict[col.ROADCOND]
+            C = col.ROADCOND }
+        if (!wDict.hasOwnProperty(col.WEATHER))
+            wDict[col.WEATHER] = 0
+        wDict[col.WEATHER]++;
+        if (wDict[col.WEATHER] > maxW) {
+            maxW = wDict[col.WEATHER]
+            W = col.WEATHER }
+    }
+    d3.select('#analytics_all_btn').on('click', function(){
+        d3.select('#analytics_loc').text("Neighborhood: All Neighborhoods")
+        d3.select('#analytics_num').text("Collisions: " + filteredCollisions.length)
+        d3.select('#analytics_sev').text("Most Common Road Condition: " + C
+            + " (" + Math.round(maxC/filteredCollisions.length*100) +"%)")
+        d3.select('#analytics_cond').text("Most Common Weather: " + W 
+            + " (" + Math.round(maxW/filteredCollisions.length*100) +"%)")
+        map.setView([47.6062, -122.3321], 11);
+        d3.select('#analytics_loc_btn').on('click', function(){
+            map.setView([47.6062, -122.3321], 11);
+        })
+    })
 }
 
 // INTERACTIVE TOOLS
