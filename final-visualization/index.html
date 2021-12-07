@@ -13,18 +13,19 @@
         <div class="card" style="width: 18rem;">
             <div class="card-body">
               <h5 class="card-title">Collision Analytics </h5>
-              <p class="card-text">Select an dot/bubble to see analytics!</p>
+              <p class="card-text">Select a dot/bubble to see analytics!</p>
             </div>
             <ul class="list-group list-group-flush">
-              <li id="analytics_loc" class="list-group-item">Location:</li>
+              <li id="analytics_loc" class="list-group-item">Neighborhood: All Neighborhoods </li>
               <!-- if this is bubble mode we do collision number, most common severity and percent, 
                     most common weather condition and percent -->
-              <li id="analytics_num" class="list-group-item">Number of People/Collision Number: </li>
-              <li id="analytics_sev" class="list-group-item">Severity: </li>
-              <li id="analytics_cond" class="list-group-item">Weather Conditions: </li>
+              <li id="analytics_num" class="list-group-item">Collisions: </li>
+              <li id="analytics_sev" class="list-group-item">Most Common Severity: </li>
+              <li id="analytics_cond" class="list-group-item">Most Common Weather: </li>
             </ul>
             <div class="card-body">
-                <a href="#" class="btn btn-primary">Go to Location</a>
+                <a href="#" id="analytics_loc_btn"class="btn btn-primary">Go to Location</a>
+                <a href="#" id="analytics_all_btn"class="btn btn-secondary" onclick="">All of Seattle</a>
             </div>
         </div>
         <button id="back_button" type="button" class="btn btn-dark">Back to General</button>
