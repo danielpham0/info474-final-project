@@ -214,10 +214,56 @@ d3.csv("test_collisions_n.csv").then(function(collection) {
     var subgroups = ["INJURY_COUNT", "UNKNOWN_COUNT", "PROPERTY_DAMAGE_COUNT", "SERIOUS_INJURY_COUNT"]
     console.log(subgroups);
 
-    var groups = collTypeData.map(function(d){
-        //console.log(d.COLLISION_TYPE)
-            return d.COLLSION_TYPE })
+    var groups = d3.map(collTypeData, function(d){
+            return d.COLLISION_TYPE }).keys()
     console.log(groups);
+
+      // Add X axis
+  var x = d3.scaleBand()
+    .domain(groups)
+    .range([0, width])
+    .padding([0.2])
+    svg2.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickSizeOuter(0));
+
+     // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 40])
+    .range([ height, -200 ]);
+    svg2.append("g")
+    .call(d3.axisLeft(y));
+
+  // color palette = one color per subgroup
+  var color = d3.scaleOrdinal()
+    .domain(subgroups)
+    .range(['#e41a1c','#377eb8','#4daf4a', '#8A2BE2'])
+
+  //stack the data? --> stack per subgroup
+  var stackedData = d3.stack()
+    .keys(subgroups)
+    (collTypeData)
+
+    console.log(stackedData)
+
+
+
+// Show the bars
+  svg2.append("g")
+  .selectAll("g")
+  // Enter in the stack data = loop key per key = group per group
+  .data(stackedData)
+  .enter().append("g")
+    .attr("fill", function(d) { return color(d.key); })
+    .selectAll("rect")
+    // enter a second time = loop subgroup per subgroup to add all rectangles
+    .data(function(d) { return d; })
+    .enter().append("rect")
+      .attr("x", function(d) { console.log(x(d.collTypeData.group)); })
+      .attr("y", function(d) { return y(d[1]); })
+      .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+      .attr("width",x.bandwidth())
+
 
     // Handle all barchart calculations and handling
     // var subgroups = [];
@@ -232,14 +278,15 @@ d3.csv("test_collisions_n.csv").then(function(collection) {
     // List of groups = value of the first column called group -> I show them on the X axis
     // NEEDS FIX, how to get unique, individual collision types?
     //var groups = d3.map(dataset, function(d){return(d.COLTYPE)}).keys()
-    var groups = [];
-    for (let i = 0; i < dataset.length; i++) {
-        if (groups.includes(dataset[i].COLLISIONTYPE)) {
-            groups.push();
-        } else {
-            groups.push(dataset[i].COLLISIONTYPE);
-        }
-    }
+    // var groups = [];
+    // for (let i = 0; i < dataset.length; i++) {
+    //     if (groups.includes(dataset[i].COLLISIONTYPE)) {
+    //         groups.push();
+    //     } else {
+    //         groups.push(dataset[i].COLLISIONTYPE);
+    //     }
+    // }
+    // console.log(groups);
 
     // Create counter for each of the severity descriptions.
     sev1_count = 0;
