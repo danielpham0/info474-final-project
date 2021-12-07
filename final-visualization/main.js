@@ -295,9 +295,7 @@ function updateChart() {
     var filteredCollisions = dataset.filter(function(d) {
         let date = new Date(d.INCDTTM)
         let month = date.getMonth()
-        return d.PERSONCOUNT >= curPersonRange[0] && d.PERSONCOUNT <= curPersonRange[1] && 
-            (getNeighValue(d.NEIGHBORHOOD) == curNeighborhood || 
-                curNeighborhood == ALL_NEIGHBORHOODS || curNeighborhood == ' ') &&
+        return d.PERSONCOUNT >= curPersonRange[0] && d.PERSONCOUNT <= curPersonRange[1] &&
             month >= curMonthRange[0] && month <= curMonthRange[1]
     })
     // generates collision counts in each neighborhood dependent on that filtered data
