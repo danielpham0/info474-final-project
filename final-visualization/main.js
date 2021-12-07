@@ -187,106 +187,6 @@ d3.csv("test_collisions_n.csv").then(function(collection) {
     dataset = collection
     updateChart()
 
-    // STACKED BAR CHART
-    // Count severities for each collision type
-    var collisionTypeCounts = dataset.reduce((res, col) => {
-        var collType = col.COLLISIONTYPE;
-        if (collType == '') collType = 'Unlisted'
-        if (!res.hasOwnProperty(collType)) {
-            res[collType] = {
-                "Injury Collision": 0,
-                "Unknown": 0,
-                "Property Damage Only Collision": 0,
-                "Serious Injury Collision": 0
-            }
-        }
-        res[collType][col.SEVERITYDESC]++;
-        return res;
-    }, {});
-
-    // reformat the collision type data to be readable by d3
-    let totalColMax = 0
-    collTypeData = Object.keys(collisionTypeCounts).map(k => {
-        let cur = collisionTypeCounts[k]
-        let curTotal = cur["Injury Collision"] + 
-            cur["Property Damage Only Collision"] + 
-            cur["Serious Injury Collision"] + cur["Unknown"]
-        totalColMax = Math.max(totalColMax, curTotal)
-        return{"COLLISION_TYPE": k, "INJURY": cur["Injury Collision"], 
-            "PROPERTY_DAMAGE": cur["Property Damage Only Collision"], 
-            "SERIOUS_INJURY": cur["Serious Injury Collision"],
-            "UNKNOWN": cur["Unknown"], }
-    });
-
-    // groups: collision type, subgroups: severity count
-    var subgroups = ["INJURY", "UNKNOWN", "PROPERTY_DAMAGE", "SERIOUS_INJURY"]
-    var groups = collTypeData.map(function(d){
-            return d.COLLISION_TYPE })
-
-    // Add X axis
-    var x = d3.scaleBand()
-        .domain(groups)
-        .range([0, width+300])
-        .padding([.35])
-        svg2.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickSizeOuter(0));
-
-    // Add Y axis
-    var y = d3.scaleLinear()
-        .domain([0, totalColMax + 5 - totalColMax%5])
-        .range([ height, -200 ]);
-        svg2.append("g")
-        .call(d3.axisLeft(y));
-
-    // color palette = one color per subgroup
-    var color = d3.scaleOrdinal()
-        .domain(subgroups)
-        .range(['#e41a1c','#377eb8','#4daf4a', '#8A2BE2'])
-
-    //stack the data? --> stack per subgroup
-    var stackedData = d3.stack()
-        .keys(subgroups)
-        (collTypeData)
-        console.log(stackedData)
-
-    // Show the bars
-    var bars = svg2.append("g")
-        .selectAll("g")
-        // Enter in the stack data = loop key per key = group per group
-        .data(stackedData)
-        .enter().append("g")
-        .attr("fill", function(d) { return color(d.key); })
-        .selectAll("rect")
-        // enter a second time = loop subgroup per subgroup to add all rectangles
-    // Tooltip initialzied and hidden
-    var tooltip = d3.select("#collisionGraph1")
-        .append("div")
-        .style("opacity", 0)
-        .attr("class", "tooltip")
-        .style("background-color", "white")
-        .style("border", "solid")
-        .style("border-width", "2px")
-        .style("border-radius", "8px")
-        .style("padding", "8px")
-    bars.data(function(d) { console.log(d); return d; })
-        .enter().append("rect")
-        .attr("x", function(d) { return x(d.data.COLLISION_TYPE); })
-        .attr("y", function(d) { return y(d[1]); })
-        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-        .attr("width",x.bandwidth())
-        .on("mouseover", function(d) {
-            var subgroupName = d3.select(this.parentNode).datum().key;
-            var subgroupValue = d.data[subgroupName];
-            tooltip
-                .html("Severity: " + subgroupName + "<br>" + "Number of Collisions: " + subgroupValue)
-                .style("opacity", 1)
-        })
-        .on("mouseleave", function(d) {
-            tooltip
-            .style("opacity", 0)
-        })
-
     // INITIALIZE ANALYTICS FOR CARD
     // calculate general analytics for the collisions
     let maxW = 0, wDict = {}, W = ''
@@ -484,6 +384,118 @@ function updateChart() {
             map.setView([47.6062, -122.3321], 11);
         })
     })
+
+    // STACKED BAR CHART
+    // filter to neighborhood
+    // WHILE WE WOULD WANT TO REMOVE THIS IN A MORE OPTIMAL MANNER THIS WAS THE ONLY SOLUTION WE COULD COME UP WITH
+    // Effectively the issue is that we have two layers of data to update as well as the X and Y axis, it is much less
+    // complicated to redraw, which is all we can really do with this due date.
+    var neighFilteredCols = filteredCollisions.filter(function(d) {
+        return (getNeighValue(d.NEIGHBORHOOD) == curNeighborhood || 
+                curNeighborhood == ALL_NEIGHBORHOODS || curNeighborhood == ' ')
+    })
+    svg2.selectAll('*').remove();
+    // Count severities for each collision type
+    d3.select("#tempBarchartTitle").text(curNeighborhood.toLowerCase().split(/_|-/)
+        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+        .join(' ') + " <-- be sure to include this in the title")
+    var collisionTypeCounts = neighFilteredCols.reduce((res, col) => {
+        var collType = col.COLLISIONTYPE;
+        if (collType == '') collType = 'Unlisted'
+        if (!res.hasOwnProperty(collType)) {
+            res[collType] = {
+                "Injury Collision": 0,
+                "Unknown": 0,
+                "Property Damage Only Collision": 0,
+                "Serious Injury Collision": 0
+            }
+        }
+        res[collType][col.SEVERITYDESC]++;
+        return res;
+    }, {});
+
+    // reformat the collision type data to be readable by d3
+    let totalColMax = 0
+    collTypeData = Object.keys(collisionTypeCounts).map(k => {
+        let cur = collisionTypeCounts[k]
+        let curTotal = cur["Injury Collision"] + 
+            cur["Property Damage Only Collision"] + 
+            cur["Serious Injury Collision"] + cur["Unknown"]
+        totalColMax = Math.max(totalColMax, curTotal)
+        return{"COLLISION_TYPE": k, "INJURY": cur["Injury Collision"], 
+            "PROPERTY_DAMAGE": cur["Property Damage Only Collision"], 
+            "SERIOUS_INJURY": cur["Serious Injury Collision"],
+            "UNKNOWN": cur["Unknown"], }
+    });
+
+    // groups: collision type, subgroups: severity count
+    var subgroups = ["INJURY", "UNKNOWN", "PROPERTY_DAMAGE", "SERIOUS_INJURY"]
+    var groups = collTypeData.map(function(d){
+            return d.COLLISION_TYPE })
+
+    // Add X axis
+    var x = d3.scaleBand()
+        .domain(groups)
+        .range([0, width+300])
+        .padding([.35])
+        svg2.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickSizeOuter(0));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+        .domain([0, totalColMax + 5 - totalColMax%5])
+        .range([ height, -200 ]);
+        svg2.append("g")
+        .call(d3.axisLeft(y));
+
+    // color palette = one color per subgroup
+    var color = d3.scaleOrdinal()
+        .domain(subgroups)
+        .range(['#e41a1c','#377eb8','#4daf4a', '#8A2BE2'])
+
+    //stack the data? --> stack per subgroup
+    var stackedData = d3.stack()
+        .keys(subgroups)
+        (collTypeData)
+        console.log(stackedData)
+
+    // Show the bars
+    var bars = svg2.append("g")
+        .selectAll("g")
+        // Enter in the stack data = loop key per key = group per group
+        .data(stackedData)
+        .enter().append("g")
+        .attr("fill", function(d) { return color(d.key); })
+        .selectAll("rect")
+        // enter a second time = loop subgroup per subgroup to add all rectangles
+    // Tooltip initialzied and hidden
+    var tooltip = d3.select("#collisionGraph1")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "8px")
+        .style("padding", "8px")
+    bars.data(function(d) { console.log(d); return d; })
+        .enter().append("rect")
+        .attr("x", function(d) { return x(d.data.COLLISION_TYPE); })
+        .attr("y", function(d) { return y(d[1]); })
+        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+        .attr("width",x.bandwidth())
+        .on("mouseover", function(d) {
+            var subgroupName = d3.select(this.parentNode).datum().key;
+            var subgroupValue = d.data[subgroupName];
+            tooltip
+                .html("Severity: " + subgroupName + "<br>" + "Number of Collisions: " + subgroupValue)
+                .style("opacity", 1)
+        })
+        .on("mouseleave", function(d) {
+            tooltip
+            .style("opacity", 0)
+        })
 }
 
 // INTERACTIVE TOOLS
