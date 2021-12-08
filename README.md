@@ -9,9 +9,13 @@ The dataset used for this project is called “Collisions,” retrieved from dat
 ## Instructions to Run Locally
 1. To run the server, open Terminal (for Mac) or Command Prompt (for Windows). Navigate to the folder info474-final-project/final-visualization using for example, cd /info474-final-project/final-visualization.
 2. In the console execute the following command if you're running Python 2.x:
-    python -m SimpleHTTPServer 8080
+
+    `python -m SimpleHTTPServer 8080`
+
 if you're running Python 3.x or higher, use
-    python -m http.server 8080  (or python3 -m http.server 8080)
+
+`python -m http.server 8080  (or python3 -m http.server 8080)`
+
 3. Now, open your browser and type `http://localhost:8080/` in the URL bar and press enter or go.
 
 If you go to the directory `info474-final-project/final-visualization`, you will see the file named `index.html`. When you enter `http://localhost:8080/` in your browser, your browser will automatically load the file named `index.html` in the folder.
