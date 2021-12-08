@@ -7,7 +7,7 @@ The dataset used for this project is called “Collisions,” retrieved from dat
 [Click here to access the visualization on the hosted system](https://danielpham0.github.io/info474-final-project/final-visualization/)
 
 ## Instructions to Run Locally
-1. To run the server, open Terminal (for Mac) or Command Prompt (for Windows). Navigate to the folder info474-final-project/final-visualization using for example, cd /info474-final-project/final-visualization.
+1. To run the server, open Terminal (for Mac) or Command Prompt (for Windows). Navigate to the folder `info474-final-project/final-visualization` using for example, `cd/info474-final-project/final-visualization`.
 2. In the console execute the following command if you're running Python 2.x:
 
     `python -m SimpleHTTPServer 8080`
