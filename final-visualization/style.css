@@ -18,6 +18,10 @@ body {
     padding-right:250px;
 }
 
+h2 {
+    text-align: center;
+}
+
 /* colors and positions the banner.*/
 .header-container {
     position: relative;

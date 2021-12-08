@@ -27,11 +27,11 @@
             </p>
             <p>
                 The dataset is a geographic traffic collision dataset in CSV form. There are a total of 
-                40 attributes and approximately 230,000 rows of data. Examples of the most notable attributes include the date of an 
-                incident, location (x and y coordinates), junction type, weather type, and severity description.
+                40 attributes and approximately 230,000 rows of data. Examples of notable attributes include location coordinates, weather type,
+                road conditions, number of individuals involved, and severity description.
             </p>
 
-            <h2>How to Use and Interpret</h2>
+            <h2>How to Interact with Visualizations</h2>
             <ul>
                 <li>
                     <strong>Collision Analytics Card:</strong> the card shown on the left shows vital statistics for a selected region.
@@ -42,9 +42,19 @@
                 <li>
                     <strong>Map:</strong> the map in the middle shows the areas in Seattle that have had collisions. <strong>There are two modes
                     for the graph: neighborhood cases and individual cases.</strong> Neighborhood cases is the default view, and is shown with 
-                    bubbles that are larger if there are more collision instances in a neighborhood. Individual cases show dots for every
+                    bubbles that vary in size based on the number of collision instances in a neighborhood. Individual cases show dots for every
                     collision in each neighborhood, which can be seen by toggling the <strong>"Individual Cases" switch</strong> below the analytics card.
-                    To avoid accidentally clicking on neighborhoods, switch on <strong>"Drag Mode."</strong>
+                    To avoid accidental clicks on neighborhoods while scrolling through the map, switch on <strong>"Drag Mode."</strong>
+                </li>
+                <li>
+                    <strong>Filtering:</strong> the data can be <strong>filtered by each neighborhood</strong> using the dropdown, along with
+                    <strong>"Month Range" and "Date Range" sliders</strong> that can be adjusted from either side. To reset the data to view for all of Seattle area, click "Default View."
+                </li>
+                <li>
+                    <strong>Bar Chart:</strong> the bar chart shown below the map shows the collision type versus the severity description for
+                    the Seattle area or a particular neighborhood that is selected. To see particular neighborhood cases, click on a neighborhood
+                    grid on the map, or select a neighborhood from the dropdown menu under "Filter by Neighborhood." <strong>Hover over each portion</strong> of the
+                    bar chart to view the exact count of a severity description.
                 </li>
             </ul>
 
