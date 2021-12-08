@@ -137,7 +137,18 @@ d3.json("neighborhoods.geojson")
                 d3.selectAll('.' + 
                     getNeighValue(fullName))
                     .style("display", "block")
+                    .attr("x", d3.mouse(this)[0])
+                    .attr("y", (d3.mouse(this)[1] - 10) +  "px")
             })
+            .on("mousemove", function(d){
+                let fullName = getNeighName(d.properties.nhood, d.properties.name)
+                d3.select(this).attr("fill", "red")
+                d3.selectAll('.' + 
+                    getNeighValue(fullName))
+                    .style("display", "block")
+                    .attr("x", d3.mouse(this)[0])
+                    .attr("y", (d3.mouse(this)[1] - 10) +  "px")
+            })     
             .on("mouseout", function(d){
                 let fullName = getNeighName(d.properties.nhood, d.properties.name)
                 d3.select(this).attr("fill", "black")
@@ -470,9 +481,7 @@ function updateChart() {
         // enter a second time = loop subgroup per subgroup to add all rectangles
     // Tooltip initialzied and hidden
     var tooltip = d3.select("#collisionGraph1")
-        .data(stackedData)
         .append("div")
-        .attr("x", function(d) { return x(d.COLLISION_TYPE); })
         .style("opacity", 0)
         .attr("class", "tooltip")
         .style("background-color", "white")
@@ -487,7 +496,6 @@ function updateChart() {
         .attr("height", function(d) { return y(d[0]) - y(d[1]); })
         .attr("width", x.bandwidth())
         .on("mouseover", function(d) {
-            console.log(d3.mouse(this)[0]);
             var subgroupName = d3.select(this.parentNode).datum().key;
             var subgroupValue = d.data[subgroupName];
             tooltip
