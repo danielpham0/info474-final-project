@@ -50,7 +50,7 @@ const overlay = d3.select(map.getPanes().overlayPane)
 const svg1 = overlay.select('svg').attr("pointer-events", "auto")
 // Kevin's stacked bar chart svg
 var margin = {top: 220, right: 300, bottom: 50, left: 30},
-    width = 710 - margin.left - margin.right,
+    width = 900 - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
     padding = 100;
 // append the svg object to the body of the page
@@ -470,7 +470,9 @@ function updateChart() {
         // enter a second time = loop subgroup per subgroup to add all rectangles
     // Tooltip initialzied and hidden
     var tooltip = d3.select("#collisionGraph1")
+        .data(stackedData)
         .append("div")
+        .attr("x", function(d) { return x(d.COLLISION_TYPE); })
         .style("opacity", 0)
         .attr("class", "tooltip")
         .style("background-color", "white")
@@ -485,11 +487,14 @@ function updateChart() {
         .attr("height", function(d) { return y(d[0]) - y(d[1]); })
         .attr("width", x.bandwidth())
         .on("mouseover", function(d) {
+            console.log(d3.mouse(this)[0]);
             var subgroupName = d3.select(this.parentNode).datum().key;
             var subgroupValue = d.data[subgroupName];
             tooltip
                 .html("Severity: " + subgroupName + "<br>" + "Number of Collisions: " + subgroupValue)
                 .style("opacity", 1)
+                .style("left", "670px")
+                .style("bottom", "235px")
         })
         .on("mouseleave", function(d) {
             tooltip
@@ -504,9 +509,9 @@ function updateChart() {
         .data(stackedData)
         .enter()
         .append('rect')
-        .attr('x', width + padding)
+        .attr('x', width + padding + 150)
         .attr('y', function(d, i) {
-            return (i + 13) * -18;
+            return (i + 9) * -18;
         })
         .attr('width', 12)
         .attr('height', 12)
@@ -521,9 +526,9 @@ function updateChart() {
         .text(function(d) {
             return d;
         })
-        .attr('x', width + padding + 18)
+        .attr('x', width + padding + 168)
         .attr('y', function(d, i){
-            return (i + 13) * -18;
+            return (i + 9) * -18;
         })
         .attr('text-anchor', 'start')
         .attr('alignment-baseline', 'hanging');
@@ -532,12 +537,12 @@ function updateChart() {
         .attr("class", "x label")
         .attr("text-anchor", "end")
         .attr("x", width)
-        .attr("y", height - 40)
+        .attr("y", height - 30)
         .text("Collision Types");
     
     svg2.append("text")
         .attr("class", "y label")
-        .attr("y", -15)
+        .attr("y", -25)
         .attr("x", padding)
         .attr("dy", ".75em")
         .attr("transform", "rotate(-90)")

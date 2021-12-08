@@ -52,22 +52,24 @@
         </div>
         <div class="container-fluid">
             <div class="left-element">
-                <div class="card" style="width: 18rem;">
-                    <div class="card-body">
+                <div class="card" style="width: 22rem;">
+                    <div class="card-body background">
                       <h5 class="card-title">Collision Analytics</h5>
-                      <p class="card-text">Select a Dot/Bubble to see analytics!</p>
+                      <h6 class="card-text">Select a Dot/Bubble to see analytics!</h6>
                     </div>
                     <ul class="list-group list-group-flush">
-                      <li id="analytics_loc" class="list-group-item">Neighborhood: All Neighborhoods </li>
-                      <!-- if this is bubble mode we do collision number, most common severity and percent, 
+                        <li id="analytics_loc" class="list-group-item">Neighborhood: All Neighborhoods </li>
+                        <!-- if this is bubble mode we do collision number, most common severity and percent, 
                             most common weather condition and percent -->
-                      <li id="analytics_num" class="list-group-item">Collisions: </li>
-                      <li id="analytics_sev" class="list-group-item">Most Common Severity: </li>
-                      <li id="analytics_cond" class="list-group-item">Most Common Weather: </li>
+                        <li id="analytics_num" class="list-group-item">Collisions: </li>
+                        <li id="analytics_sev" class="list-group-item">Most Common Severity: </li>
+                        <li id="analytics_cond" class="list-group-item">Most Common Weather: </li>
                     </ul>
                     <div class="card-body">
-                        <a href="#" id="analytics_loc_btn"class="btn btn-primary">Go to Location</a>
-                        <a href="#" id="analytics_all_btn"class="btn btn-secondary" onclick="">All of Seattle</a>
+                        <div class="map-modes">
+                            <a href="#" id="analytics_loc_btn"class="btn btn-primary">Go to Location</a>
+                            <a href="#" id="analytics_all_btn"class="btn btn-secondary" onclick="">All of Seattle</a>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="map-modes">
@@ -91,29 +93,35 @@
             </div>
 
             <div class="right-element"> 
-                <p>Filter by Neighborhood:</p>
-                <select class="form-select" aria-label="Default select example" id="neighborhood_select" onchange="onNeighborhoodChanged()">
-                </select>
-
-                <div class="sliders">
-                    <div class="month-slider">
-                        <p id="month_span"> Month Range </p>
-                        <div id="month_slider"></div>
+                <div class="card" style="width: 30rem;">
+                    <div class="card-body">
+                        <h5 class="">Filter by Neighborhood:</h5>
+                        <select class="form-select" aria-label="Default select example" id="neighborhood_select" onchange="onNeighborhoodChanged()">
+                        </select>
                     </div>
-                    <div class="person-slider">
-                        <p id="person_span"> Person Count Range </p>
-                        <div id="person_slider"></div>
+                    <div class="card-body">
+                        <div class="sliders">
+                            <div class="month-slider">
+                                <strong id="month_span"> Month Range </strong>
+                                <div id="month_slider"></div>
+                            </div>
+                            <div class="person-slider">
+                                <strong id="person_span"> Person Count Range </strong>
+                                <div id="person_slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <button id="back_button" type="button" class="btn btn-dark">Default View</button>
                     </div>
                 </div>
-
-                <button id="back_button" type="button" class="btn btn-dark">Back to Default</button>
             </div>
         </div>
 
         <div class="bar-charts">
             <div>
                 <p id="tempBarchartTitle" style="padding-top: 20px;"></p>
-                <div id="collisionGraph1" style="width: 600px; height: 300px"></div>
+                <div id="collisionGraph1" style="width: 900px; height: 300px"></div>
             </div>
         </div>
     </div>
