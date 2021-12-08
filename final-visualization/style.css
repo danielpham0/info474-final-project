@@ -81,9 +81,8 @@ body {
 }
 
 .bar-charts {
-    position: absolute;
-    left: 50%;
-    transform: translate(-70%, 0%);
-    width: 40%;
+    position: relative;
+    transform: translate(50%, 0%);
+    width: 50%;
     text-align: center;
 }
