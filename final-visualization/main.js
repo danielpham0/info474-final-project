@@ -168,7 +168,7 @@ d3.json("neighborhoods.geojson")
                     curNeighborhood = getNeighValue(fullName)
                     neighborhoodSelect.property("value", curNeighborhood 
                         + "/" + Math.round(centerPoint[1] * 100000000) / 100000000 
-                        + "/" + Math.round(centerPoint[2] * 10000000) / 10000000);
+                        + "/" + Math.round(centerPoint[0] * 10000000) / 10000000);
                 }
                 // update chart when a neighborhood is chosen to switch to dotMode
                 updateChart()
