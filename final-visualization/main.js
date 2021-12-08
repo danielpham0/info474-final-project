@@ -79,7 +79,10 @@ d3.json("neighborhoods.geojson")
     neighborhoodList.unshift(["All Neighborhoods", 47.6062, -122.3321])
     neighborhoodSelect.selectAll("option").data(neighborhoodList)
         .enter().append("option").attr("value", function(n) {
-            return getNeighValue(n[0]) + "/" + n[1] + "/" + n[2]
+            // Should find a better way of doing the rounding thing, this will only work for this dataset
+            // may need to recreate the CSV
+            return getNeighValue(n[0]) + "/" + 
+                Math.round(n[1] * 100000000) / 100000000 + "/" + Math.round(n[2] * 10000000) / 10000000
         }).text(function(n) {
                 return n[0]
         })
@@ -164,7 +167,8 @@ d3.json("neighborhoods.geojson")
                     let fullName = getNeighName(d.properties.nhood, d.properties.name)
                     curNeighborhood = getNeighValue(fullName)
                     neighborhoodSelect.property("value", curNeighborhood 
-                        + "/" + centerPoint[1] + "/" + centerPoint[0]);
+                        + "/" + Math.round(centerPoint[1] * 100000000) / 100000000 
+                        + "/" + Math.round(centerPoint[2] * 10000000) / 10000000);
                 }
                 // update chart when a neighborhood is chosen to switch to dotMode
                 updateChart()
@@ -351,6 +355,12 @@ function updateChart() {
                                 d3.select('#analytics_loc_btn').on('click', function() {
                                     map.setView([d.Y, d.X], 16);
                                 })
+                                // Update other parts of the vis on click
+                                neighborhoodSelect.property("value", d.NEIGHBORHOOD
+                                        + "/" + d.Y + "/" + d.X);
+                                curNeighborhood = d.NEIGHBORHOOD
+                                updateChart()
+                                
                             } else {
                                 let l = d.LOCATION.toLowerCase().split(' ')
                                     .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
@@ -362,6 +372,11 @@ function updateChart() {
                                 d3.select('#analytics_loc_btn').on('click', function(){
                                     map.setView([d.Y, d.X], 18);
                                 })
+                                // Update other parts of the vis on click
+                                neighborhoodSelect.property("value", getNeighValue(d.NEIGHBORHOOD)
+                                        + "/" + d.NY + "/" + d.NX);
+                                curNeighborhood = getNeighValue(d.NEIGHBORHOOD)
+                                updateChart()
                             }
                           });
 
