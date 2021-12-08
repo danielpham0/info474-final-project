@@ -50,7 +50,7 @@
 
 
         </div>
-        <div class="container">
+        <div class="container-fluid">
             <div class="left-element">
                 <div class="card" style="width: 18rem;">
                     <div class="card-body">
@@ -69,21 +69,24 @@
                         <a href="#" id="analytics_loc_btn"class="btn btn-primary">Go to Location</a>
                         <a href="#" id="analytics_all_btn"class="btn btn-secondary" onclick="">All of Seattle</a>
                     </div>
-                </div>
-                <div class="map-modes">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" value="false" type="checkbox" id="mode_switch" oninput="onModeChanged()">
-                        <label class="form-check-label" for="flexSwitchCheckDefault">Individual Cases</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="drag_switch" oninput="onDragChanged()">
-                        <label class="form-check-label" for="flexSwitchCheckDefault">Drag Mode</label>
+                    <div class="card-body">
+                        <div class="map-modes">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" value="false" type="checkbox" id="mode_switch" oninput="onModeChanged()">
+                                <label class="form-check-label" for="flexSwitchCheckDefault">Individual Cases</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="drag_switch" oninput="onDragChanged()">
+                                <label class="form-check-label" for="flexSwitchCheckDefault">Drag Mode</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
             </div>
 
             <div class="middle-element">
+                <h3>Collision Bubble/Dot Map</h3>
                 <div id="map" style="width: 700px; height: 500px; margin: 10px;"></div>
             </div>
 

@@ -53,27 +53,36 @@ body {
     font-size: 40px;
 }
 
-.container {
+.container-fluid {
     display: flex;
+    flex-direction: row;
     justify-content: space-evenly;
-    align-items: center;
 }
 
 .left-element {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.middle-element {
     display: inline-block;
+    text-align: center;
 }
 
 .right-element {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: 15px;
 }
 
 .map-modes {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
+    align-items: center;
 }
 
 .sliders {

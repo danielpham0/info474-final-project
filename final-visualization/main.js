@@ -336,7 +336,7 @@ function updateChart() {
                                 d3.select('#analytics_cond').text("Most Common Weather: " + W 
                                     + " (" + Math.round(maxW/d.COL_COUNT*100) +"%)")
                                 // SETS LOCATION BUTTON
-                                d3.select('#analytics_loc_btn').on('click', function(){
+                                d3.select('#analytics_loc_btn').on('click', function() {
                                     map.setView([d.Y, d.X], 16);
                                 })
                             } else {
@@ -451,7 +451,7 @@ function updateChart() {
     // color palette = one color per subgroup
     var color = d3.scaleOrdinal()
         .domain(subgroups)
-        .range(['#e41a1c','#377eb8','#4daf4a', '#8A2BE2'])
+        .range(['#ffcc00','#ff9966','#99cc33', '#cc3300'])
 
     //stack the data? --> stack per subgroup
     var stackedData = d3.stack()
@@ -517,7 +517,7 @@ function updateChart() {
         .data(subgroups)
         .enter()
         .append('text')
-        .text(function(d){
+        .text(function(d) {
             return d;
         })
         .attr('x', width + padding + 18)
