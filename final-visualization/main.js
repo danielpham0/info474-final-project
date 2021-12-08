@@ -6,6 +6,7 @@
 var dataset = []
 var neighborhoodData = []
 var neighborhoodList = []
+var neighNameList = []
 // Initialize interaction/filter variables
 const ALL_NEIGHBORHOODS = "all_neighborhoods"
 var curMonthRange = [3, 10]
@@ -68,8 +69,9 @@ d3.json("neighborhoods.geojson")
     // If there are spaces, when we have a value, we replace those spaces with underscores.
 
     // Set up neighborhood select
-    let neighborhoodList = [...new Set(neighborhoods.features.map((feature) => {
+    neighborhoodList = [...new Set(neighborhoods.features.map((feature) => {
         let n = getNeighName(feature.properties.nhood, feature.properties.name)
+        neighNameList.push(getNeighValue(n))
         let centerPoint = turf.center(feature).geometry.coordinates
         //adjust the values for center point
         if (n) return [n, centerPoint[1], centerPoint[0]]
@@ -236,7 +238,7 @@ function updateChart() {
     var neighborhoodColCounts = filteredCollisions.reduce((res, col) => {
         var nName = getNeighValue(col.NEIGHBORHOOD)
         if (!res.hasOwnProperty(nName)) {
-            neighborhoodList.push(nName)
+            // neighborhoodList.push(nName)
             res[nName] = {'COL_COUNT': 0,
                 'X': col.NX,
                 'Y': col.NY,
@@ -274,10 +276,9 @@ function updateChart() {
         .domain([0,8])
         .range([ .8, 1]) 
     // color of dot based on neighborhood
-    var color = d3.scaleOrdinal()
-        .domain(neighborhoodList)
+    var colorScale = d3.scaleOrdinal()
+        .domain(neighNameList)
         .range(colorList)
-    
     // CREATE AND UPDATE THE CIRCLE SVG's
     // create all the dots
     const Dots = svg1.selectAll('circle')
@@ -285,7 +286,7 @@ function updateChart() {
                     .data(collisions)
                     .join('circle')
                         .attr("id", "dotties")
-                        .attr("fill", function(d) {return color(getNeighValue(d.NEIGHBORHOOD))}) // color based on neighborhood
+                        .attr("fill", function(d) {return colorScale(getNeighValue(d.NEIGHBORHOOD))}) // color based on neighborhood
                         .attr("opacity", function(d) {
                             if(dotMode) {return opacity(d.PERSONCOUNT)} // opacity based on number of people involved
                             return 1})
@@ -304,7 +305,7 @@ function updateChart() {
                           .on('mouseout', function(d) { //reverse the action based on when we mouse off the the circle
                             d3.select(this).transition()
                               .duration('152')
-                              .attr("fill", function(d) {return color(getNeighValue(d.NEIGHBORHOOD))}) 
+                              .attr("fill", function(d) {return colorScale(getNeighValue(d.NEIGHBORHOOD))}) 
                               .attr('r', function(d) {
                                 if(dotMode) {return 4}
                                 return radius(d.COL_COUNT) })
