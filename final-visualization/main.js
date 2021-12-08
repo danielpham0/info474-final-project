@@ -48,9 +48,10 @@ g = svg.append("g").attr("class", "leaflet-zoom-hide");
 const overlay = d3.select(map.getPanes().overlayPane)
 const svg1 = overlay.select('svg').attr("pointer-events", "auto")
 // Kevin's stacked bar chart svg
-var margin = {top: 220, right: 400, bottom: 50, left: 30},
+var margin = {top: 220, right: 300, bottom: 50, left: 30},
     width = 710 - margin.left - margin.right,
-    height = 270 - margin.top - margin.bottom;
+    height = 300 - margin.top - margin.bottom;
+    padding = 100;
 // append the svg object to the body of the page
 var svg2 = d3.select("#collisionGraph1").style("margin-right", "20px") 
   .append("svg")
@@ -58,7 +59,7 @@ var svg2 = d3.select("#collisionGraph1").style("margin-right", "20px")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+          "translate(" + margin.left + "," + margin.right + ")");
 
 // READ AND HANDLE GEOJSON FOR NEIGHBORHOODS - initializes base layer of neighborhood boundaries
 d3.json("neighborhoods.geojson")
@@ -299,7 +300,7 @@ function updateChart() {
                         .on('mouseover', function() { // handle when mouse is over dot
                             d3.select(this).transition() 
                               .duration('120')
-                              .attr("fill", "red")
+                              .attr("fill", "white")
                               .attr('r', 10) 
                           })
                           .on('mouseout', function(d) { //reverse the action based on when we mouse off the the circle
@@ -311,7 +312,6 @@ function updateChart() {
                                 return radius(d.COL_COUNT) })
                           })
                           .on('click', function(d) {
-                            console.log(d)
                             if(!dotMode) {
                                 // NEIGHBORHOOD
                                 let n = d.NEIGHBORHOOD.toLowerCase().split(/_|-/)
@@ -436,17 +436,18 @@ function updateChart() {
     // Add X axis
     var x = d3.scaleBand()
         .domain(groups)
-        .range([0, width+300])
+        .range([25, width+250])
         .padding([.35])
         svg2.append("g")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", "translate(0," + -60 + ")")
         .call(d3.axisBottom(x).tickSizeOuter(0));
 
     // Add Y axis
     var y = d3.scaleLinear()
         .domain([0, totalColMax + 5 - totalColMax%5])
-        .range([ height, -200 ]);
+        .range([ height, -200]);
         svg2.append("g")
+        .attr("transform", "translate(" + 25 + ", -80)")
         .call(d3.axisLeft(y));
 
     // color palette = one color per subgroup
@@ -458,7 +459,6 @@ function updateChart() {
     var stackedData = d3.stack()
         .keys(subgroups)
         (collTypeData)
-        console.log(stackedData)
 
     // Show the bars
     var bars = svg2.append("g")
@@ -479,12 +479,12 @@ function updateChart() {
         .style("border-width", "2px")
         .style("border-radius", "8px")
         .style("padding", "8px")
-    bars.data(function(d) { console.log(d); return d; })
+    bars.data(function(d) { return d; })
         .enter().append("rect")
         .attr("x", function(d) { return x(d.data.COLLISION_TYPE); })
-        .attr("y", function(d) { return y(d[1]); })
+        .attr("y", function(d) { return y(d[1]) -80; })
         .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-        .attr("width",x.bandwidth())
+        .attr("width", x.bandwidth())
         .on("mouseover", function(d) {
             var subgroupName = d3.select(this.parentNode).datum().key;
             var subgroupValue = d.data[subgroupName];
@@ -496,6 +496,53 @@ function updateChart() {
             tooltip
             .style("opacity", 0)
         })
+
+    var legend = svg2.append('g')
+        .attr('class', 'legend')
+        .attr('transform', 'translate(' + 12 + ', 0)');
+
+    legend.selectAll('rect')
+        .data(stackedData)
+        .enter()
+        .append('rect')
+        .attr('x', width + padding)
+        .attr('y', function(d, i) {
+            return (i + 13) * -18;
+        })
+        .attr('width', 12)
+        .attr('height', 12)
+        .attr('fill', function(d, i){
+            return color(d.key);
+        });
+    
+    legend.selectAll('text')
+        .data(subgroups)
+        .enter()
+        .append('text')
+        .text(function(d){
+            return d;
+        })
+        .attr('x', width + padding + 18)
+        .attr('y', function(d, i){
+            return (i + 13) * -18;
+        })
+        .attr('text-anchor', 'start')
+        .attr('alignment-baseline', 'hanging');
+
+    svg2.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height - 40)
+        .text("Collision Types");
+    
+    svg2.append("text")
+        .attr("class", "y label")
+        .attr("y", -15)
+        .attr("x", padding)
+        .attr("dy", ".75em")
+        .attr("transform", "rotate(-90)")
+        .text("Number of Collisions");
 }
 
 // INTERACTIVE TOOLS
