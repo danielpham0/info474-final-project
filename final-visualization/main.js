@@ -499,7 +499,7 @@ function updateChart() {
             var subgroupName = d3.select(this.parentNode).datum().key;
             var subgroupValue = d.data[subgroupName];
             tooltip
-                .html("Severity: " + subgroupName + "<br>" + "Number of Collisions: " + subgroupValue)
+                .html("<div>Severity: " + subgroupName + "</div><br>" + "<div>Number of Collisions: " + subgroupValue + "</div>")
                 .style("opacity", 1)
                 .style("left", "670px")
                 .style("bottom", "235px")

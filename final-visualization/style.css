@@ -97,3 +97,9 @@ body {
     width: 50%;
     text-align: center;
 }
+
+.tooltip {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+}
