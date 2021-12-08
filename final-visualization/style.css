@@ -13,6 +13,11 @@ body {
     margin: 20px;
 }
 
+.introduction {
+    padding-left:250px;
+    padding-right:250px;
+}
+
 /* colors and positions the banner.*/
 .header-container {
     position: relative;
