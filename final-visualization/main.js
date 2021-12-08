@@ -289,7 +289,7 @@ function updateChart() {
                         .attr("opacity", function(d) {
                             if(dotMode) {return opacity(d.PERSONCOUNT)} // opacity based on number of people involved
                             return 1})
-                        .attr("stroke", "black")
+                        .attr("stroke", "white")
                         .attr("cx", d => map.latLngToLayerPoint([d.Y,d.X]).x - boundShift[0])
                         .attr("cy", d => map.latLngToLayerPoint([d.Y,d.X]).y - boundShift[1])
                         .attr("r", function(d) {
@@ -394,9 +394,9 @@ function updateChart() {
     })
     svg2.selectAll('*').remove();
     // Count severities for each collision type
-    d3.select("#tempBarchartTitle").text(curNeighborhood.toLowerCase().split(/_|-/)
+    d3.select("#tempBarchartTitle").text("Collision Type vs. Severity Description for: " + curNeighborhood.toLowerCase().split(/_|-/)
         .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        .join(' ') + " <-- be sure to include this in the title")
+        .join(' '))
     var collisionTypeCounts = neighFilteredCols.reduce((res, col) => {
         var collType = col.COLLISIONTYPE;
         if (collType == '') collType = 'Unlisted'
