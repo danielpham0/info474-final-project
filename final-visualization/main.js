@@ -408,6 +408,11 @@ function updateChart() {
         d3.select('#analytics_loc_btn').on('click', function(){
             map.setView([47.6062, -122.3321], 11);
         })
+        // Update other parts of the vis on click
+        neighborhoodSelect.property("value", 'all_neighborhoods'
+            + "/" + 47.6062 + "/" + -122.3321);
+        curNeighborhood = 'all_neighborhoods'
+        updateChart()
     })
 
     // STACKED BAR CHART
